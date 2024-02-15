@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('phone').value =""
             document.getElementById('password').value =""
 
+            window.location.href = '../login/login.html'
+
         }catch (error) {
             alert(error.response.data.error)
         }

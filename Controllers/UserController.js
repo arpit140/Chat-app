@@ -1,4 +1,5 @@
 const User = require('../models/UserModel')
+const bcrypt = require('bcrypt')
 
 const UserController = {
     signup: async (req,res) => {
@@ -21,6 +22,32 @@ const UserController = {
             res.status(500).json({error: "Internal server Error"})
         }
 
+    },
+
+    login: async (req,res) => {
+        const{email,password} = req.body
+
+        try{
+            const user = await User.findOne({
+                where:{
+                    email: email,
+                }
+            })
+            if(!user){
+                return res.status(404).json({error:'User not found'})
+            }
+            const isValidPassword = await bcrypt.compare(password,user.password)
+
+            if(!isValidPassword){
+                return res.status(401).json({error: "Invalid Password"})
+
+            }
+
+            res.status(200).json({message: "Login successfull"})
+        }catch(err){
+            console.error('Error in login' , err)
+            res.status(500).json({ error: "Internal server error"})
+        }
     }
 }
 

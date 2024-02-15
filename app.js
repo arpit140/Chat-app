@@ -10,7 +10,9 @@ const sequelize = require('./Util/db')
 const app = express()
 
 //MiddleWares
-app.use(cors())
+app.use(cors({
+    origin: 'http://127.0.0.1:4000'
+}))
 app.use(express.json())
 app.use(express.static(path.join(__dirname,"public")));
 
