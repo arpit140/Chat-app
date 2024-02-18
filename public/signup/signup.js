@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await axios.post('/signup',userData)
+            const response = await axios.post('/user/signup',userData)
 
             alert (response.data.message)
 

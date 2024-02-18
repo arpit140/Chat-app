@@ -13,9 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // console.log(userData)
 
         try{
-            const response = await axios.post('/login',userData)
+            const response = await axios.post('/user/login',userData)
             if(response && response.data){
+                localStorage.setItem('token', response.data.token)
                 alert(response.data.message)
+                window.location.href = '../chat/chat.html'
+                
+                
             }else{
                 console.error("Unexpected response structures", response)
             }
