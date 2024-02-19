@@ -65,11 +65,11 @@ app.get('/', (req,res) => {
 })
 
 
-// Socket.io Connection
+//Socket.io
+
 io.on('connection', async (socket) => {
     console.log('A user connected');
 
-  
     try {
         const chatHistory = await Message.findAll();
         socket.emit('chat history', chatHistory);
@@ -77,29 +77,25 @@ io.on('connection', async (socket) => {
         console.error('Error retrieving chat history from the database', error);
     }
 
-    
     socket.on('request chat history', async (groupId) => {
         try {
             console.log('Received request for chat history. Group ID:', groupId);
             const history = await Message.findAll({ where: { groupId } });
-          
             io.to(socket.id).emit('chat history', history);
         } catch (error) {
             console.error('Error retrieving chat history from the database', error);
         }
     });
 
-
     socket.on('chat message', async (msg) => {
         try {
             console.log('Received chat message:', msg);
-            
-         
+
             if (msg.group && msg.group.id) {
                 await Message.create({
                     user: msg.user,
                     message: msg.message,
-                    groupId: msg.group.id, 
+                    groupId: msg.group.id,
                 });
             }
 
@@ -112,10 +108,21 @@ io.on('connection', async (socket) => {
     
     socket.on('switch group', (group) => {
         console.log(`User ${socket.id} switched to group: ${group.name}`);
-
+        
     });
 
-  
+    
+    socket.on('delete group', async (groupId) => {
+        try {
+            await Group.destroy({ where: { id: groupId } });
+
+            const updatedGroups = await Group.findAll();
+            io.emit('group list', updatedGroups);
+        } catch (error) {
+            console.error('Error deleting group', error);
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected');
     });

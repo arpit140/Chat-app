@@ -3,10 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('connect', () => {
         console.log('Socket.IO connected!');
     });
+
     let currentUser = null;
     let currentGroup = null;
     let groups = [];
-    let groupMessages = {}
+    let groupMessages = {};
 
     const form = document.querySelector('#form');
     const input = document.querySelector('#m');
@@ -26,13 +27,24 @@ document.addEventListener('DOMContentLoaded', () => {
         groups.forEach((group) => {
             const li = document.createElement('li');
             li.textContent = group.name;
+    
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.addEventListener('click', () => {
+                deleteGroup(group.id); 
+            });
+    
+            li.appendChild(deleteButton);
+    
             li.addEventListener('click', () => {
                 console.log('Switching group:', group);
                 switchGroup(group);
             });
+    
             groupList.appendChild(li);
         });
     };
+    
 
 
     const switchGroup = (group) => {
@@ -40,25 +52,44 @@ document.addEventListener('DOMContentLoaded', () => {
         currentGroup = group;
         console.log('Current group:', currentGroup);
         messages.innerHTML = ''; 
-    
+
         if (currentGroup) {
             console.log('Requesting chat history for group:', currentGroup.id);
-            
             socket.emit('request chat history', currentGroup.id);
-    
-            
+
             const selectedGroupElement = document.getElementById('selected-group');
             if (selectedGroupElement) {
                 selectedGroupElement.textContent = `Selected Group: ${group.name}`;
             }
         }
     };
+    const deleteGroup = (groupId) => {
+        console.log('Deleting group with ID:', groupId);
     
-
+        axios.delete(`/user/group/delete/${groupId}`)
+            .then((response) => {
+                const updatedGroups = response.data.groups;
+                updateGroupList(updatedGroups);
+    
+                if (currentGroup && currentGroup.id === groupId) {
+                    currentGroup = null;
+                    const selectedGroupElement = document.getElementById('selected-group');
+                    if (selectedGroupElement) {
+                        selectedGroupElement.textContent = 'Selected Group: None';
+                    }
+                }
+            })
+            .catch((error) => {
+                console.error('Error deleting group', error);
+            });
+    };
+    
+    
+    
 
     form.addEventListener('submit', (event) => {
         event.preventDefault();
-        console.log('Submit button clicked');
+        console.log('Submit button clicked'); 
         if (input.value && currentGroup) {
             console.log('Sending chat message:', { user: currentUser, message: input.value, group: currentGroup });
             socket.emit('chat message', { user: currentUser, message: input.value, group: currentGroup });
@@ -68,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createGroupForm.addEventListener('submit', (event) => {
         event.preventDefault();
-        console.log('Create Group button clicked')
+        console.log('Create Group button clicked');
         const groupName = groupNameInput.value;
         if (groupName) {
             axios.post('/user/group/create', { name: groupName })
@@ -83,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         }
     });
+
     socket.on('chat message', (msg) => {
         console.log('Received chat message:', msg);
         addMessageToChat(msg);
@@ -135,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const fetchedGroups = response.data.groups;
             groups = fetchedGroups;
             updateGroupList(groups);
-
             if (currentGroup) {
                 socket.emit('request chat history', currentGroup.id);
             }

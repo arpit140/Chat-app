@@ -14,6 +14,6 @@ router.get('/current', UserController.getCurrentUserInfo)
 
 router.post('/group/create', GroupController.createGroup)
 router.get('/group/list', GroupController.getGroupList)
-
+router.delete('/group/delete/:id', GroupController.deleteGroup)
 
 module.exports = router 
