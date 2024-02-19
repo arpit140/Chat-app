@@ -3,17 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Window</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <title>Group Chat</title>
+    <style>
+        
+        body {
+            display: flex;
+            justify-content: space-between;
+        }
+        #group-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #group-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background-color: #f0f0f0;
+            width: 200px;
+            overflow-y: auto;
+        }
+        #group-list li {
+            cursor: pointer;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        #group-list li:hover {
+            background-color: #e0e0e0;
+        }
+        #selected-group {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        #chat-container {
+            flex-grow: 1;
+        }
+        #messages {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        #form {
+            display: flex;
+            margin-top: 10px;
+        }
+        #m {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        button {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="chat-container">
-        <ul id="messages"></ul>
+    <div id="group-container">
+        <ul id="group-list"></ul>
+        <form id="create-group-form">
+            <input type="text" id="group-name" placeholder="Enter group name" />
+            <button type="submit">Create Group</button>
+        </form>
+        <div id="selected-group"></div>
+    </div>
+    <div id="chat-container">
+        <div id="messages"></div>
         <form id="form" action="">
             <input id="m" autocomplete="off" /><button>Send</button>
         </form>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4" crossorigin="anonymous"></script>
     <script src="./chat.js"></script>
 </body>
 </html>

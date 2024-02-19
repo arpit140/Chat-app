@@ -2,6 +2,7 @@ const {DataTypes} = require("sequelize")
 const sequelize = require('../Util/db')
 const bcrypt = require('bcrypt')
 // const Message = require('./MessageModel')
+// const Group = require('./GroupModel')
 
 const User = sequelize.define('User', {
     id:{
@@ -30,8 +31,7 @@ const User = sequelize.define('User', {
     }
 })
 
-// User.hasMany(Message)
-// Message.belongsTo(User)
+
 
 User.beforeCreate(async (user) => {
     user.password = await bcrypt.hash(user.password,10)
