@@ -18,40 +18,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const addMessageToChat = (msg) => {
         const li = document.createElement('li');
-        li.textContent = `${msg.user}: ${msg.message}`;
+        const isCurrentUser = msg.user === currentUser;
+    
+        li.classList.add(isCurrentUser ? 'sent' : 'received');
+    
+        const messageDiv = document.createElement('div');
+        
+        if (!isCurrentUser) {
+            const senderName = document.createElement('span');
+            senderName.textContent = `${msg.user}: `;
+            senderName.classList.add('sender-name');
+            messageDiv.appendChild(senderName);
+        }
+    
+        messageDiv.textContent += msg.message;
+        li.appendChild(messageDiv);
+    
         messages.appendChild(li);
+    
+        messages.scrollTop = messages.scrollHeight;
     };
+    
+    
 
     const updateGroupList = (groups) => {
         groupList.innerHTML = '';
         groups.forEach((group) => {
             const li = document.createElement('li');
             li.textContent = group.name;
-    
+
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.addEventListener('click', () => {
-                deleteGroup(group.id); 
+                deleteGroup(group.id);
             });
-    
+
             li.appendChild(deleteButton);
-    
+
             li.addEventListener('click', () => {
                 console.log('Switching group:', group);
                 switchGroup(group);
             });
-    
+
             groupList.appendChild(li);
         });
     };
-    
-
 
     const switchGroup = (group) => {
         console.log('Switching to group:', group);
         currentGroup = group;
         console.log('Current group:', currentGroup);
-        messages.innerHTML = ''; 
+        messages.innerHTML = '';
 
         if (currentGroup) {
             console.log('Requesting chat history for group:', currentGroup.id);
@@ -63,14 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+
     const deleteGroup = (groupId) => {
         console.log('Deleting group with ID:', groupId);
-    
+
         axios.delete(`/user/group/delete/${groupId}`)
             .then((response) => {
                 const updatedGroups = response.data.groups;
                 updateGroupList(updatedGroups);
-    
+
                 if (currentGroup && currentGroup.id === groupId) {
                     currentGroup = null;
                     const selectedGroupElement = document.getElementById('selected-group');
@@ -83,13 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error deleting group', error);
             });
     };
-    
-    
-    
 
     form.addEventListener('submit', (event) => {
         event.preventDefault();
-        console.log('Submit button clicked'); 
+        console.log('Submit button clicked');
         if (input.value && currentGroup) {
             console.log('Sending chat message:', { user: currentUser, message: input.value, group: currentGroup });
             socket.emit('chat message', { user: currentUser, message: input.value, group: currentGroup });
@@ -105,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             axios.post('/user/group/create', { name: groupName })
                 .then((response) => {
                     const newGroup = response.data.group;
-                    groups = [...groups, newGroup];  
+                    groups = [...groups, newGroup];
                     updateGroupList(groups);
                     groupNameInput.value = '';
                 })
@@ -146,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('group messages', (groupMessages) => {
         console.log('Received group messages:', groupMessages);
-        messages.innerHTML = ''; 
+        messages.innerHTML = '';
         groupMessages.forEach((msg) => {
             addMessageToChat(msg);
         });
